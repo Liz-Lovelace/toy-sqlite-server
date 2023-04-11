@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stuff App</title>
+</head>
+<body>
+    <h1>Stuff App</h1>
+    <button id="addStuff">Add Stuff</button>
+    <button id="clearStuff">Clear Stuff</button>
+    <table id="stuffTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const addStuffButton = document.getElementById('addStuff');
+        const clearStuffButton = document.getElementById('clearStuff');
+        const stuffTable = document.getElementById('stuffTable');
+
+        const getStuff = async () => {
+            const response = await fetch('/stuff');
+            const data = await response.json();
+            updateTable(data);
+        };
+
+        const addStuff = async () => {
+            await fetch('/stuff', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: 'stuff_body' })
+            });
+            getStuff();
+        };
+
+        const clearStuff = async () => {
+            await fetch('/stuff', {
+                method: 'DELETE'
+            });
+            getStuff();
+        };
+
+        const updateTable = (data) => {
+            const tbody = stuffTable.getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = item.id;
+                row.insertCell().textContent = item.current_timestamp;
+                row.insertCell().textContent = item.message;
+            });
+        };
+
+        addStuffButton.addEventListener('click', addStuff);
+        clearStuffButton.addEventListener('click', clearStuff);
+
+        setInterval(getStuff, 1000);
+    </script>
+</body>
+</html>
